@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, accuracy_score, balanced_accuracy_score, recall_score, roc_auc_score
 
 from utils import linear_split, stationwise_split, EvcFeatureGenerator
