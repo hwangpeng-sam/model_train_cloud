@@ -4,5 +4,5 @@ COPY ./requirements.txt /train/requirements.txt
 WORKDIR /train
 RUN pip install -r requirements.txt
 ENTRYPOINT [ "python3" ]
-CMD ["basemodels_multiclass.py"]
+CMD ["run_model.py"]
 

@@ -78,11 +78,11 @@ def test(model, test_dataloader):
 def run(args):
     print(f'prediction step is {args.pred_step} ({args.pred_step*20} min) interval')
     np.random.seed(42)  # fix random seed
-
+    input_dir = './model_input_data'
     #Load station attribute, embeddings
-    train_seq = pd.read_csv('./model_input_data/train_data_label_630.csv', parse_dates=['time'])
-    station_attributes = pd.read_csv('./model_input_data/station_attrs_630.csv')
-    station_embeddings = pd.read_csv('./model_input_data/station_embed_630.csv')
+    train_seq = pd.read_csv(input_dir + '/train_data_label_630.csv', parse_dates=['time'])
+    station_attributes = pd.read_csv(input_dir + '/station_attrs_630.csv')
+    station_embeddings = pd.read_csv(input_dir + '/station_embed_630.csv')
     train_generator = EvcFeatureGenerator(train_seq, station_attributes.copy(), station_embeddings.copy())
 
     #Load R_seq, H_seq, T, S, Y
@@ -165,7 +165,7 @@ def run(args):
             #재학습 안할꺼라 옵티마이저는 저장 안함
             scripted_model = torch.jit.script(model)
             torch.jit.save(scripted_model, 
-                           f'./model_output/{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_model.pt')
+                           f'{directory}/{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_model.pt')
             print(f'epoch-{epoch}_model saved')
             #결과 저장
             pickle_file_path = os.path.join(directory, f'{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_resultmetric.pkl')
