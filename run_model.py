@@ -153,7 +153,7 @@ def run(args):
         # save after last epoch
         model_metrics.update({'model':args.model, 'test_frac':args.test_frac, 'epoch':epoch})
         result_metrics.append(model_metrics)
-        if epoch % 20 == 0: #20에폭 단위로 저장
+        if epoch == 1: #% 20 == 0: #20에폭 단위로 저장
             # Create the directory if it doesn't exist
             directory = f'./model_output/{args.pred_step}'
             print(f'saving file at {directory}')
