@@ -161,8 +161,7 @@ def run(args):
 
     for epoch in range(1, args.n_epoch + 1):
         print(f'<<Epoch {epoch}>>', end='\n')
-        loss = train(model, train_loader, optim, epoch, verbose=1)
-        train_loss.append(loss)
+        train(model, train_loader, optim, epoch, verbose=1, pkl_dir=directory, model_name=args.model)
         model_metrics = test(model, test_loader)
         # save after last epoch
         model_metrics.update({'model':args.model, 'test_frac':args.test_frac, 'epoch':epoch})
@@ -179,9 +178,6 @@ def run(args):
             with open(pickle_file_path, 'wb') as f:
                 pickle.dump(result_metrics, f)         
             print(f'epoch-{epoch}_result metric saved')
-            pickle_file_path = os.path.join(directory, f'{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_train_loss.pkl')
-            with open(pickle_file_path, 'wb') as f:
-                pickle.dump(train_loss, f)  
 
             #임베딩값 일단 무시
             # if args.model in EMB_MODELS:
