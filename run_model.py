@@ -18,7 +18,7 @@ import pickle
 import os
 
 
-def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, model_name = None):
+def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, model_name = None, pred_step):
     model.train()
     for b_i, (R, H, T, S, y) in enumerate(train_dataloader):
         optim.zero_grad()
@@ -34,7 +34,7 @@ def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, mode
                     100 * b_i / len(train_dataloader), loss.item()
                 ))
             if b_i == (len(train_dataloader) - 1 ):
-                pickle_file_path = os.path.join(pkl_dir, f'{model_name}_epoch-{epoch}_pred_step-{args["pred_step"]}_train_loss.pkl')
+                pickle_file_path = os.path.join(pkl_dir, f'{model_name}_epoch-{epoch}_pred_step-{pred_step}_train_loss.pkl')
                 with open(pickle_file_path, 'wb') as f:
                     pickle.dump(loss.item(), f)         
                 print(f'{model_name}_epoch-{epoch}_train_loss saved')
@@ -161,7 +161,7 @@ def run(args):
 
     for epoch in range(1, args.n_epoch + 1):
         print(f'<<Epoch {epoch}>>', end='\n')
-        train(model, train_loader, optim, epoch, verbose=1, pkl_dir=directory, model_name=args.model)
+        train(model, train_loader, optim, epoch, verbose=1, pkl_dir=directory, model_name=args.model, pred_step=args.pred_step)
         model_metrics = test(model, test_loader)
         # save after last epoch
         model_metrics.update({'model':args.model, 'test_frac':args.test_frac, 'epoch':epoch})
