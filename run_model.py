@@ -154,14 +154,15 @@ def run(args):
     # # optim = torch.optim.Adam(model.parameters(), weight_decay=1e-3)
 
 
-    directory = f'./performance_check/{args.pred_step}'
-    print(f'creating {directory}')
+    directory = f'./model_output/{args.pred_step}'
     if not os.path.exists(directory):
         os.makedirs(directory)
+    print(f'creating {directory}')
 
     for epoch in range(1, args.n_epoch + 1):
         print(f'<<Epoch {epoch}>>', end='\n')
-        train(model, train_loader, optim, epoch, verbose=1, model_name=args.model)
+        loss = train(model, train_loader, optim, epoch, verbose=1)
+        train_loss.append(loss)
         model_metrics = test(model, test_loader)
         # save after last epoch
         model_metrics.update({'model':args.model, 'test_frac':args.test_frac, 'epoch':epoch})
@@ -178,6 +179,9 @@ def run(args):
             with open(pickle_file_path, 'wb') as f:
                 pickle.dump(result_metrics, f)         
             print(f'epoch-{epoch}_result metric saved')
+            pickle_file_path = os.path.join(directory, f'{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_train_loss.pkl')
+            with open(pickle_file_path, 'wb') as f:
+                pickle.dump(train_loss, f)  
 
             #임베딩값 일단 무시
             # if args.model in EMB_MODELS:
