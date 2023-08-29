@@ -33,7 +33,7 @@ def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, mode
                     epoch, b_i * len(R), len(train_dataloader.dataset),
                     100 * b_i / len(train_dataloader), loss.item()
                 ))
-            if b_i == (len(train_dataloader) - 1 ):
+            if b_i == (len(train_dataloader) - 1):
                 pickle_file_path = os.path.join(pkl_dir, f'{model_name}_epoch-{epoch}_pred_step-{pred_step}_train_loss.pkl')
                 with open(pickle_file_path, 'wb') as f:
                     pickle.dump(loss.item(), f)         
