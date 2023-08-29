@@ -18,7 +18,7 @@ import pickle
 import os
 
 
-def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, model_name = None, pred_step):
+def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, model_name = None, pred_step=1):
     model.train()
     for b_i, (R, H, T, S, y) in enumerate(train_dataloader):
         optim.zero_grad()
