@@ -33,6 +33,7 @@ def train(model, train_dataloader, optim, epoch, verbose=0):
                     epoch, b_i * len(R), len(train_dataloader.dataset),
                     100 * b_i / len(train_dataloader), loss.item()
                 ))
+        return loss.item()
 
 def test(model, test_dataloader):
     model.eval()
@@ -132,6 +133,7 @@ def run(args):
     basemodel = models[args.model]
     print(basemodel)
 
+    train_loss = []
     result_metrics = []
 
     print(f'-------{args.model}-------')
@@ -148,12 +150,13 @@ def run(args):
 
     for epoch in range(1, args.n_epoch + 1):
         print(f'<<Epoch {epoch}>>', end='\n')
-        train(model, train_loader, optim, epoch, verbose=1)
+        loss = train(model, train_loader, optim, epoch, verbose=1)
+        train_loss.append(loss)
         model_metrics = test(model, test_loader)
         # save after last epoch
         model_metrics.update({'model':args.model, 'test_frac':args.test_frac, 'epoch':epoch})
         result_metrics.append(model_metrics)
-        if epoch == 1: #% 20 == 0: #20에폭 단위로 저장
+        if epoch % 10 == 0: #10에폭 단위로 저장
             # Create the directory if it doesn't exist
             directory = f'./model_output/{args.pred_step}'
             print(f'saving file at {directory}')
@@ -171,7 +174,10 @@ def run(args):
             with open(pickle_file_path, 'wb') as f:
                 pickle.dump(result_metrics, f)         
             print(f'epoch-{epoch}_result metric saved')
-            
+            pickle_file_path = os.path.join(directory, f'{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_train_loss.pkl')
+            with open(pickle_file_path, 'wb') as f:
+                pickle.dump(train_loss, f)  
+
             #임베딩값 일단 무시
             # if args.model in EMB_MODELS:
             #     emb_df = pd.DataFrame(index=train_generator.station_embeddings.sid, data=model.sid_embedding.weight.clone().detach().numpy(), columns=['dim_' + str(i) for i in range(9)])# 수정(8)])
@@ -187,8 +193,8 @@ if __name__ == '__main__':
     parser.add_argument('--history_smoothing', action='store_true')
     parser.add_argument('--pred_step', default=1, type=int)
     parser.add_argument('--dropout_p', default=0.2, type=float)
-    parser.add_argument('--n_epoch', default=1, type=int)
-    parser.add_argument('--model', default='MultiSeqUmapEmb', type=str)
+    parser.add_argument('--n_epoch', default=100, type=int)
+    parser.add_argument('--model', default='MultiSeqUmapEmbGating', type=str)
     args = parser.parse_args()
 
     run(args)
