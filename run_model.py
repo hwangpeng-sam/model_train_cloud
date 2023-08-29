@@ -18,7 +18,7 @@ import pickle
 import os
 
 
-def train(model, train_dataloader, optim, epoch, verbose=0):
+def train(model, train_dataloader, optim, epoch, verbose=0, pkl_dir = None, model_name = None):
     model.train()
     for b_i, (R, H, T, S, y) in enumerate(train_dataloader):
         optim.zero_grad()
@@ -33,7 +33,12 @@ def train(model, train_dataloader, optim, epoch, verbose=0):
                     epoch, b_i * len(R), len(train_dataloader.dataset),
                     100 * b_i / len(train_dataloader), loss.item()
                 ))
-        return loss.item()
+            if b_i == (len(train_dataloader) - 1 ):
+                pickle_file_path = os.path.join(pkl_dir, f'{model_name}_epoch-{epoch}_pred_step-{args["pred_step"]}_train_loss.pkl')
+                with open(pickle_file_path, 'wb') as f:
+                    pickle.dump(loss.item(), f)         
+                print(f'{model_name}_epoch-{epoch}_train_loss saved')
+
 
 def test(model, test_dataloader):
     model.eval()
@@ -148,21 +153,20 @@ def run(args):
     # #아래 옵티마이저는 run_basemodel.py에 있었던 것
     # # optim = torch.optim.Adam(model.parameters(), weight_decay=1e-3)
 
+
+    directory = f'./performance_check/{args.pred_step}'
+    print(f'creating {directory}')
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
     for epoch in range(1, args.n_epoch + 1):
         print(f'<<Epoch {epoch}>>', end='\n')
-        loss = train(model, train_loader, optim, epoch, verbose=1)
-        train_loss.append(loss)
+        train(model, train_loader, optim, epoch, verbose=1, model_name=args.model)
         model_metrics = test(model, test_loader)
         # save after last epoch
         model_metrics.update({'model':args.model, 'test_frac':args.test_frac, 'epoch':epoch})
         result_metrics.append(model_metrics)
         if epoch % 10 == 0: #10에폭 단위로 저장
-            # Create the directory if it doesn't exist
-            directory = f'./model_output/{args.pred_step}'
-            print(f'saving file at {directory}')
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-
             #모델 저장
             #재학습 안할꺼라 옵티마이저는 저장 안함
             scripted_model = torch.jit.script(model)
@@ -174,9 +178,6 @@ def run(args):
             with open(pickle_file_path, 'wb') as f:
                 pickle.dump(result_metrics, f)         
             print(f'epoch-{epoch}_result metric saved')
-            pickle_file_path = os.path.join(directory, f'{args.model}_epoch-{epoch}_pred_step-{args.pred_step}_train_loss.pkl')
-            with open(pickle_file_path, 'wb') as f:
-                pickle.dump(train_loss, f)  
 
             #임베딩값 일단 무시
             # if args.model in EMB_MODELS:
